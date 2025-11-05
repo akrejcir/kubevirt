@@ -24,6 +24,7 @@ package cli
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -35,7 +36,7 @@ import (
 
 	virtwait "kubevirt.io/kubevirt/pkg/apimachinery/wait"
 	"kubevirt.io/kubevirt/pkg/virt-launcher/virtwrap/api"
-	"kubevirt.io/kubevirt/pkg/virt-launcher/virtwrap/errors"
+	virterrors "kubevirt.io/kubevirt/pkg/virt-launcher/virtwrap/errors"
 	"kubevirt.io/kubevirt/pkg/virt-launcher/virtwrap/stats"
 	"kubevirt.io/kubevirt/pkg/virt-launcher/virtwrap/statsconv"
 )
@@ -544,10 +545,20 @@ func (l *LibvirtConnection) reconnectIfNecessary() (err error) {
 		return nil
 	}
 
-	if l.Connect, err = newConnection(l.uri, l.user, l.pass); err != nil {
+	var connect *libvirt.Connect
+	connect, err = newConnection(l.uri, l.user, l.pass)
+	if err != nil {
 		return err
 	}
-	l.alive = true
+
+	// Close connection if any of the callback registrations fails
+	var registrationSuccess bool
+	defer func() {
+		if !registrationSuccess {
+			_, connErr := connect.Close()
+			err = errors.Join(err, connErr)
+		}
+	}()
 
 	log.Log.Info("Established new Libvirt Connection")
 
@@ -590,6 +601,10 @@ func (l *LibvirtConnection) reconnectIfNecessary() (err error) {
 
 	log.Log.Error("Re-registered domain and agent callbacks for new connection")
 
+	registrationSuccess = true
+	l.Connect = connect
+	l.alive = true
+
 	if l.reconnect != nil {
 		// Notify the callback about the reconnect through channel.
 		// This way we give the callback a chance to emit an error to the watcher
@@ -604,7 +619,7 @@ func (l *LibvirtConnection) checkConnectionLost(err error) {
 		return
 	}
 
-	if errors.IsOk(err) {
+	if virterrors.IsOk(err) {
 		return
 	}
 
