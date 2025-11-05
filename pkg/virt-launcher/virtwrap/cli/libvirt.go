@@ -153,10 +153,13 @@ func (l *LibvirtConnection) DomainEventLifecycleRegister(callback libvirt.Domain
 		return
 	}
 
+	if _, err = l.Connect.DomainEventLifecycleRegister(nil, callback); err != nil {
+		l.checkConnectionLost(err)
+		return
+	}
+
 	l.domainEventCallbacks = append(l.domainEventCallbacks, callback)
-	_, err = l.Connect.DomainEventLifecycleRegister(nil, callback)
-	l.checkConnectionLost(err)
-	return
+	return nil
 }
 
 func (l *LibvirtConnection) DomainEventDeviceAddedRegister(callback libvirt.DomainEventDeviceAddedCallback) (err error) {
@@ -164,10 +167,13 @@ func (l *LibvirtConnection) DomainEventDeviceAddedRegister(callback libvirt.Doma
 		return
 	}
 
+	if _, err = l.Connect.DomainEventDeviceAddedRegister(nil, callback); err != nil {
+		l.checkConnectionLost(err)
+		return
+	}
+
 	l.domainDeviceAddedEventCallbacks = append(l.domainDeviceAddedEventCallbacks, callback)
-	_, err = l.Connect.DomainEventDeviceAddedRegister(nil, callback)
-	l.checkConnectionLost(err)
-	return
+	return nil
 }
 
 func (l *LibvirtConnection) DomainEventDeviceRemovedRegister(callback libvirt.DomainEventDeviceRemovedCallback) (err error) {
@@ -175,10 +181,13 @@ func (l *LibvirtConnection) DomainEventDeviceRemovedRegister(callback libvirt.Do
 		return
 	}
 
+	if _, err = l.VolatileDomainEventDeviceRemovedRegister(nil, callback); err != nil {
+		l.checkConnectionLost(err)
+		return
+	}
+
 	l.domainDeviceRemovedEventCallbacks = append(l.domainDeviceRemovedEventCallbacks, callback)
-	_, err = l.VolatileDomainEventDeviceRemovedRegister(nil, callback)
-	l.checkConnectionLost(err)
-	return
+	return nil
 }
 
 func (l *LibvirtConnection) AgentEventLifecycleRegister(callback libvirt.DomainEventAgentLifecycleCallback) (err error) {
@@ -186,10 +195,13 @@ func (l *LibvirtConnection) AgentEventLifecycleRegister(callback libvirt.DomainE
 		return
 	}
 
+	if _, err = l.Connect.DomainEventAgentLifecycleRegister(nil, callback); err != nil {
+		l.checkConnectionLost(err)
+		return
+	}
+
 	l.agentEventCallbacks = append(l.agentEventCallbacks, callback)
-	_, err = l.Connect.DomainEventAgentLifecycleRegister(nil, callback)
-	l.checkConnectionLost(err)
-	return
+	return nil
 }
 
 func (l *LibvirtConnection) VolatileDomainEventDeviceRemovedRegister(domain VirDomain, callback libvirt.DomainEventDeviceRemovedCallback) (int, error) {
@@ -205,10 +217,13 @@ func (l *LibvirtConnection) DomainEventMemoryDeviceSizeChangeRegister(callback l
 		return
 	}
 
+	if _, err = l.Connect.DomainEventMemoryDeviceSizeChangeRegister(nil, callback); err != nil {
+		l.checkConnectionLost(err)
+		return
+	}
+
 	l.domainDeviceMemoryDeviceSizeChangeCallbacks = append(l.domainDeviceMemoryDeviceSizeChangeCallbacks, callback)
-	_, err = l.Connect.DomainEventMemoryDeviceSizeChangeRegister(nil, callback)
-	l.checkConnectionLost(err)
-	return
+	return nil
 }
 
 func (l *LibvirtConnection) DomainEventDeregister(registrationID int) error {
