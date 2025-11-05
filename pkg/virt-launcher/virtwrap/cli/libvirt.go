@@ -149,56 +149,56 @@ func (l *LibvirtConnection) Close() (int, error) {
 	}
 }
 
-func (l *LibvirtConnection) DomainEventLifecycleRegister(callback libvirt.DomainEventLifecycleCallback) (err error) {
-	if err = l.reconnectIfNecessary(); err != nil {
-		return
+func (l *LibvirtConnection) DomainEventLifecycleRegister(callback libvirt.DomainEventLifecycleCallback) error {
+	if err := l.reconnectIfNecessary(); err != nil {
+		return err
 	}
 
-	if _, err = l.Connect.DomainEventLifecycleRegister(nil, callback); err != nil {
+	if _, err := l.Connect.DomainEventLifecycleRegister(nil, callback); err != nil {
 		l.checkConnectionLost(err)
-		return
+		return err
 	}
 
 	l.domainEventCallbacks = append(l.domainEventCallbacks, callback)
 	return nil
 }
 
-func (l *LibvirtConnection) DomainEventDeviceAddedRegister(callback libvirt.DomainEventDeviceAddedCallback) (err error) {
-	if err = l.reconnectIfNecessary(); err != nil {
-		return
+func (l *LibvirtConnection) DomainEventDeviceAddedRegister(callback libvirt.DomainEventDeviceAddedCallback) error {
+	if err := l.reconnectIfNecessary(); err != nil {
+		return err
 	}
 
-	if _, err = l.Connect.DomainEventDeviceAddedRegister(nil, callback); err != nil {
+	if _, err := l.Connect.DomainEventDeviceAddedRegister(nil, callback); err != nil {
 		l.checkConnectionLost(err)
-		return
+		return err
 	}
 
 	l.domainDeviceAddedEventCallbacks = append(l.domainDeviceAddedEventCallbacks, callback)
 	return nil
 }
 
-func (l *LibvirtConnection) DomainEventDeviceRemovedRegister(callback libvirt.DomainEventDeviceRemovedCallback) (err error) {
-	if err = l.reconnectIfNecessary(); err != nil {
-		return
+func (l *LibvirtConnection) DomainEventDeviceRemovedRegister(callback libvirt.DomainEventDeviceRemovedCallback) error {
+	if err := l.reconnectIfNecessary(); err != nil {
+		return err
 	}
 
-	if _, err = l.VolatileDomainEventDeviceRemovedRegister(nil, callback); err != nil {
+	if _, err := l.VolatileDomainEventDeviceRemovedRegister(nil, callback); err != nil {
 		l.checkConnectionLost(err)
-		return
+		return err
 	}
 
 	l.domainDeviceRemovedEventCallbacks = append(l.domainDeviceRemovedEventCallbacks, callback)
 	return nil
 }
 
-func (l *LibvirtConnection) AgentEventLifecycleRegister(callback libvirt.DomainEventAgentLifecycleCallback) (err error) {
-	if err = l.reconnectIfNecessary(); err != nil {
-		return
+func (l *LibvirtConnection) AgentEventLifecycleRegister(callback libvirt.DomainEventAgentLifecycleCallback) error {
+	if err := l.reconnectIfNecessary(); err != nil {
+		return err
 	}
 
-	if _, err = l.Connect.DomainEventAgentLifecycleRegister(nil, callback); err != nil {
+	if _, err := l.Connect.DomainEventAgentLifecycleRegister(nil, callback); err != nil {
 		l.checkConnectionLost(err)
-		return
+		return err
 	}
 
 	l.agentEventCallbacks = append(l.agentEventCallbacks, callback)
@@ -213,14 +213,14 @@ func (l *LibvirtConnection) VolatileDomainEventDeviceRemovedRegister(domain VirD
 	return l.Connect.DomainEventDeviceRemovedRegister(dom, callback)
 }
 
-func (l *LibvirtConnection) DomainEventMemoryDeviceSizeChangeRegister(callback libvirt.DomainEventMemoryDeviceSizeChangeCallback) (err error) {
-	if err = l.reconnectIfNecessary(); err != nil {
-		return
+func (l *LibvirtConnection) DomainEventMemoryDeviceSizeChangeRegister(callback libvirt.DomainEventMemoryDeviceSizeChangeCallback) error {
+	if err := l.reconnectIfNecessary(); err != nil {
+		return err
 	}
 
-	if _, err = l.Connect.DomainEventMemoryDeviceSizeChangeRegister(nil, callback); err != nil {
+	if _, err := l.Connect.DomainEventMemoryDeviceSizeChangeRegister(nil, callback); err != nil {
 		l.checkConnectionLost(err)
-		return
+		return err
 	}
 
 	l.domainDeviceMemoryDeviceSizeChangeCallbacks = append(l.domainDeviceMemoryDeviceSizeChangeCallbacks, callback)
@@ -231,9 +231,9 @@ func (l *LibvirtConnection) DomainEventDeregister(registrationID int) error {
 	return l.Connect.DomainEventDeregister(registrationID)
 }
 
-func (l *LibvirtConnection) LookupDomainByName(name string) (dom VirDomain, err error) {
-	if err = l.reconnectIfNecessary(); err != nil {
-		return
+func (l *LibvirtConnection) LookupDomainByName(name string) (VirDomain, error) {
+	if err := l.reconnectIfNecessary(); err != nil {
+		return nil, err
 	}
 
 	domain, err := l.Connect.LookupDomainByName(name)
@@ -241,14 +241,14 @@ func (l *LibvirtConnection) LookupDomainByName(name string) (dom VirDomain, err 
 	return domain, err
 }
 
-func (l *LibvirtConnection) DomainDefineXML(xml string) (dom VirDomain, err error) {
-	if err = l.reconnectIfNecessary(); err != nil {
-		return
+func (l *LibvirtConnection) DomainDefineXML(xml string) (VirDomain, error) {
+	if err := l.reconnectIfNecessary(); err != nil {
+		return nil, err
 	}
 
-	dom, err = l.Connect.DomainDefineXML(xml)
+	domain, err := l.Connect.DomainDefineXML(xml)
 	l.checkConnectionLost(err)
-	return
+	return domain, err
 }
 
 func (l *LibvirtConnection) ListAllDomains(flags libvirt.ConnectListAllDomainsFlags) ([]VirDomain, error) {
