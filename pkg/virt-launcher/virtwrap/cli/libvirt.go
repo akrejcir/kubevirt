@@ -600,8 +600,9 @@ func (l *LibvirtConnection) reconnectIfNecessary() (err error) {
 }
 
 func (l *LibvirtConnection) checkConnectionLost(err error) {
-	l.reconnectLock.Lock()
-	defer l.reconnectLock.Unlock()
+	if err == nil {
+		return
+	}
 
 	if errors.IsOk(err) {
 		return
@@ -621,7 +622,11 @@ func (l *LibvirtConnection) checkConnectionLost(err error) {
 		libvirt.ERR_AUTH_FAILED,
 		libvirt.ERR_SYSTEM_ERROR,
 		libvirt.ERR_RPC:
-		l.alive = false
+		func() {
+			l.reconnectLock.Lock()
+			defer l.reconnectLock.Unlock()
+			l.alive = false
+		}()
 		log.Log.With("code", libvirtError.Code).Reason(libvirtError).Error("Connection to libvirt lost.")
 	}
 }
